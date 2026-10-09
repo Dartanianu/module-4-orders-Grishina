@@ -24,7 +24,7 @@ class OrdersWindow:
 
     def is_admin(self):
         """Проверяет роль Администратора."""
-        return( self.current_user and self.current_user[5] == "Администратор")
+        return(self.current_user and self.current_user[5] == "Администратор")
 
     def build_ui(self):
         """Строит интерфейс."""
@@ -49,16 +49,18 @@ class OrdersWindow:
         self.tree.column("client", width=400, anchor="w")
         
         self.tree.pack(fill="both", expand=True, padx=20, pady=20)
+        
+        
         self.tree.bind("<Double-1>", self.on_order_select)
 
-        btn_frame = tk.Button(self.window, bg=COLOR_MAIN_BG)
+        btn_frame = tk.Frame(self.window, bg=COLOR_MAIN_BG)
         btn_frame.pack(fill="x", pady=10)
         
-        tk.Button(btn_frame, text="Просмотор состава", command=self.on_order_select)
+        tk.Button(btn_frame, text="Просмотор состава", command=self.on_order_select, bg=COLOR_ACCENT, fg="white", font=font(FONT_SIZE_NORMAL), padx=15, pady=5).pack(side="left", padx=20)
         
-        tk.Button(btn_frame, text="Обновить", command=self.load_orders)
+        tk.Button(btn_frame, text="Обновить", command=self.load_orders, bg=COLOR_ACCENT, fg="white", font=font(FONT_SIZE_NORMAL), padx=15, pady=5).pack(side="left", padx=20)
         
-        tk.Button(btn_frame, text="Назад", command=self.window.destroy)
+        tk.Button(btn_frame, text="Назад", command=self.window.destroy, bg=COLOR_ACCENT, fg="white", font=font(FONT_SIZE_NORMAL), padx=15, pady=5).pack(side="left", padx=20)
 
     def load_orders(self):
         """Загружает заказы из БД."""
@@ -77,8 +79,8 @@ class OrdersWindow:
         if not selected:
             messagebox.showerror("Ошибка", "Выберите заказ")
             return
-
         item = self.tree.item(selected[0])
         order_id = item["values"][0]
+        
         from order_items_window import OrderItemsWindow
         OrderItemsWindow(self.window, order_id, self.current_user)

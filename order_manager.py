@@ -54,13 +54,10 @@ def get_order_items(order_id):
     """
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("SELECT Состав_заказа.id, Товар.название, Товар.Производитель,"
-                "Состав_заказа.модель, Состав_заказа.количество, Состав_заказа.цена"
-                "FROM Состав_заказа"
-                "JOIN Товар ON Состав_заказа.товар_id = Товар.id"
-                "WHERE Состав_заказа.заказ_id = ?"
-                "ORDER BY Состав_заказа.id", (order_id,))
-    rows = cur.fetchall
+    cur.execute('''
+            SELECT Состав_заказа.id, Товар.название, Товар.производитель, Состав_заказа.модель, Состав_заказа.количество, Состав_заказа.цена FROM Состав_заказа JOIN Товар ON Состав_заказа.товар_id = Товар.id WHERE Состав_заказа.заказ_id = ? ORDER BY Состав_заказа.id
+    ''', (order_id,))
+    rows = cur.fetchall()
     conn.close()
     return rows
 
@@ -144,7 +141,7 @@ def delete_order(order_id):
             cur.execute("DELETE FROM Заказ WHERE id = ?", (order_id,))
             conn.commit()
             return True
-    except:
+    except Exception as e:
         conn.rollback()
         return False
     finally:
