@@ -2,7 +2,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from styles import (
-    COLOR_MAIN_BG, COLOR_SECONDARY_BG, COLOR_ACCENT,
+    COLOR_MAIN_BG, COLOR_SECONDARY_BG, COLOR_ACCENT, FONT_SIZE_HEADER,
     FONT_SIZE_NORMAL, FONT_SIZE_TITLE, font
 )
 from resources import get_product_image
@@ -51,27 +51,31 @@ class ViewForm:
         info_frame = tk.Frame(main, bg=COLOR_MAIN_BG)
         info_frame.pack(side="left", fill="both", expand=True, padx=20)
 
-        # TODO: Добавь 6 вызовов _add_field:
-        #       - Производитель (product[3])
-        #       - Наименование (product[1])
-        #       - Категория (product[2])
-        #       - Характеристики (product[4])
-        #       - Цена (f"{product[5]} руб.")
-        #       - Модель (product[8])
+        self._add_field(info_frame, "Производитель", self.product[3])
+        self._add_field(info_frame, "Наименование", self.product[1])
+        self._add_field(info_frame, "Категория", self.product[2])
+        self._add_field(info_frame, "Характеристики", self.product[4])
+        self._add_field(info_frame, "Цена", self.product[3])
+        self._add_field(info_frame, "Модель", self.product[8])
 
         # Поле ввода количества — ДОПИСАТЬ
         qty_frame = tk.Frame(self.window, bg=COLOR_MAIN_BG)
         qty_frame.pack(fill="x", padx=20, pady=10)
 
-        # TODO: Label "Количество:"
-        # TODO: Entry с self.qty_var = tk.StringVar(value="1")
+        tk.Label(qty_frame, text="Количество:", font=font(FONT_SIZE_HEADER, bold=True), bg=COLOR_MAIN_BG, width=25, anchor="w").pack(side="left")
+        self.qty_var = tk.StringVar(value="1")
 
         # Кнопки — ДОПИСАТЬ
         btn_frame = tk.Frame(self.window, bg=COLOR_MAIN_BG)
         btn_frame.pack(fill="x", pady=10)
 
-        # TODO: Кнопка "Добавить в заказ" (command=self.add_to_order)
-        # TODO: Кнопка "Назад" (command=self.window.destroy)
+        btn_add = tk.Button(btn_frame, text="Добавить в заказ", command=self.add_to_order,
+                            bg=COLOR_ACCENT, fg="white", padx=15, pady=5)
+        btn_add.pack(side="left", padx=20)
+        
+        btn_back = tk.Button(btn_frame, text="Назад", command=self.window.destroy,
+                            bg=COLOR_ACCENT, fg="white", padx=15, pady=5)
+        btn_back.pack(side="left", padx=20)
 
     def _add_field(self, parent, label, value):
         """
@@ -80,18 +84,40 @@ class ViewForm:
         :param label: название поля
         :param value: значение
         """
-        # TODO: Создай фрейм row с фоном COLOR_MAIN_BG
-        # TODO: Создай метку с f"{label}:" — жирно, ширина 15, слева
-        # TODO: Создай метку со str(value) — слева
-        pass
+        row = tk.Frame(parent, bg=COLOR_MAIN_BG)
+        row.pack(fill="x", padx=3)
+        
+        label_txt = tk.Label(row, text=f"{label}", font=font(FONT_SIZE_NORMAL, bold=True), width=15, anchor="w", bg=COLOR_MAIN_BG).pack(side="left")
+        value_txt = tk.Label(row, text=str(value), font=font(FONT_SIZE_NORMAL, bold=True), width=15, anchor="w", bg=COLOR_MAIN_BG)
+        value_txt.pack(side="left", fill="x")
 
     def add_to_order(self):
         """Обработчик добавления в заказ."""
-        # TODO: Проверь self.product — если пусто, showerror
-        # TODO: Валидация через validate_positive_int
-        # TODO: Если qty > current_qty — showwarning
-        # TODO: Оберни в try-except
-        # TODO: items = [(self.product[0], self.product[8], qty, self.product[5])]
-        # TODO: order_id = create_order("Клиент", items)
-        # TODO: Если order_id — showinfo + on_add_to_order() + destroy
-        pass
+        if not self.product:
+            messagebox.showerror("Ошибка", "Товар не выбран")
+            return
+        
+        ok, result = validate_positive_int(self.qty_var.get(), "Количество")
+        
+        if not ok:
+            messagebox.showerror("Ошибка ввода", result)
+            return
+        qty = result
+        
+        try:
+            product_id = self.product.id
+            current_qty = get_product_quantity(product_id)
+
+            if qty_now < 1:
+                messagebox.showwarning("Внимание", "Товар закончился")
+                return
+            if qty > current_qty:
+                messagebox.showwarning("Внимание", f"В наличии только {current_qty} шт.")
+                return
+                       
+            messagebox.showinfo("Успех", "Заказ оформлен")
+            
+            if self.on_add_to_order:
+                self.on_add_to_order()
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось оформить заказ{e}")

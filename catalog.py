@@ -17,20 +17,19 @@ def create_product_card(parent, product, refresh=None):
     :param refresh: callback для обновления каталога после заказа
     :return: созданный Frame
     """
-    # TODO: Получи количество товара: qty = product[6]
-    # TODO: Определи цвет фона: bg_color = _get_card_color(qty)
-    # TODO: Создай Frame с рамкой:
-    #       card = tk.Frame(parent, bg=bg_color, bd=1, relief="solid")
-    # TODO: Размести через card.pack(fill="x", padx=10, pady=5)
-    # TODO: Добавь изображение: _add_image(card, product, bg_color)
-    # TODO: Добавь текст: _add_text_info(card, product, bg_color, qty)
-    # TODO: Привяжи клик на card:
-    #       card.bind("<Button-1>", lambda e: _open_view(parent, product, refresh))
-    # TODO: Привяжи клик на все дочерние элементы:
-    #       for child in card.winfo_children():
-    #           child.bind("<Button-1>", lambda e: _open_view(parent, product, refresh))
-    # TODO: Верни card
-    pass
+    qty = product[6]
+    bg_color = _get_card_color(qty)
+    
+    card = tk.Frame(parent, bg=bg_color, bd=1, relief="solid")
+    card.pack(fill="x", padx=10, pady=5)
+    
+    _add_image(card, product, bg_color)
+    _add_text_info(card, product, bg_color, qty)
+    
+    card.bind("<Button-1>", lambda e: _open_view(parent, product, refresh))
+    for child in card.winfo_children():
+        child.bind("<Button-1>", lambda e: _open_view(parent, product, refresh))
+    return card
 
 
 def _get_card_color(qty):
@@ -40,27 +39,22 @@ def _get_card_color(qty):
     :param qty: количество товара
     :return: HEX-цвет
     """
-    # TODO: Верни COLOR_HIGHLIGHT, если qty <= 3, иначе COLOR_MAIN_BG
-    pass
+    return COLOR_HIGHLIGHT if qty <= 3 else COLOR_MAIN_BG
 
 
+        
 def _add_image(card, product, bg_color):
-    """
-    Добавляет изображение товара (или заглушку).
-    :param card: карточка товара
-    :param product: кортеж с данными товара
-    :param bg_color: цвет фона
-    """
-    # TODO: Создай Frame для изображения (side="left", padx=10, pady=10)
-    # TODO: Получи фото: photo = get_product_image(product[7], size=(100, 100))
-    # TODO: Если photo:
-    #       - Создай Label с image=photo, bg=bg_color
-    #       - Сохрани ссылку: img_label.image = photo
-    #       - Упакуй через pack()
-    # TODO: Иначе:
-    #       - Создай Label с текстом "[НЕТ ФОТО]"
-    pass
+    img_frame = tk.Frame(card, bg=bg_color)
+    img_frame.pack(side="left", padx=10, pady=10)
 
+    photo = get_product_image(product[7], size=(100, 100))
+    if photo:
+        img_label = tk.Label(img_frame, image=photo, bg=bg_color)
+        img_label.image = photo
+        img_label.pack()
+    else:
+        tk.Label(img_frame, text="[НЕТ ФОТО]", bg=bg_color,
+                 width=10, height=5).pack()
 
 def _add_text_info(card, product, bg_color, qty):
     """
@@ -70,22 +64,21 @@ def _add_text_info(card, product, bg_color, qty):
     :param bg_color: цвет фона
     :param qty: количество
     """
-    # TODO: Создай Frame для текста (side="left", fill="both",
-    #       expand=True, padx=10, pady=10)
-    # TODO: Получи значения с проверкой на пустоту:
-    #       name = product[1] if product[1] else "[Без названия]"
-    #       production = product[3] if product[3] else "[Без производителя]"
-    #       category = product[2] if product[2] else "[Без категории]"
-    #       characteristics = product[4] if product[4] else "[Не указаны]"
-    #       price = product[5] if product[5] is not None else 0
-    # TODO: Добавь метки через _add_label:
-    #       - f"{production} | {name}" — bold=True, size=FONT_SIZE_HEADER
-    #       - f"Категория: {category}"
-    #       - f"Количество: {_indicator(qty)} ({qty})"
-    #       - f"Характеристики: {characteristics}"
-    #       - f"{price} руб." — bold=True, size=FONT_SIZE_HEADER, align="e"
-    pass
+    text_frame = tk.Frame(card, bg=bg_color)
+    text_frame.pack(side="left", fill="both", expand=True, padx=10, pady=10)
 
+    name = product[1] if product[1] else "[Без названия]"
+    production = product[3] if product[3] else "[Без производителя]"
+    category = product[2] if product[2] else "[Без категории]"
+    characteristics = product[4] if product[4] else "[Не указаны]"
+    price = product[5] if product[5] is not None else 0
+
+    _add_label(text_frame, f"{production} | {name}", bg_color, bold=True)
+    _add_label(text_frame, f"Категория: {category}", bg_color,)
+    _add_label(text_frame, f"Количество: {_indicator(qty)} ({qty})", bg_color,)
+    _add_label(text_frame, f"Характеристики: {characteristics}", bg_color,)    
+    _add_label(text_frame, f"{price} руб.", bg_color, size=FONT_SIZE_HEADER, align="e")
+    
 
 def _add_label(parent, text, bg_color, bold=False,
                size=FONT_SIZE_NORMAL, align="w"):
@@ -98,10 +91,7 @@ def _add_label(parent, text, bg_color, bold=False,
     :param size: размер шрифта
     :param align: выравнивание ("w" — слева, "e" — справа)
     """
-    # TODO: Создай tk.Label с text, font=font(size, bold=bold),
-    #       bg=bg_color, anchor=align
-    # TODO: Упакуй через .pack(fill="x")
-    pass
+    tk.Label(parent, text=text, font=font(size, bold=bold), bg=bg_color, anchor=align).pack(fill="x")
 
 
 def _indicator(qty):
@@ -110,8 +100,7 @@ def _indicator(qty):
     :param qty: количество
     :return: «много» или «мало»
     """
-    # TODO: Верни "много" если qty > 5, иначе "мало"
-    pass
+    return "много" if qty > 5 else "мало"
 
 
 def _open_view(parent, product, refresh=None):
@@ -121,6 +110,5 @@ def _open_view(parent, product, refresh=None):
     :param product: кортеж с данными товара
     :param refresh: callback для обновления каталога
     """
-    # TODO: Импортируй ViewForm из view_form
-    # TODO: Создай ViewForm(parent, product, on_add_to_order=refresh)
-    pass
+    from view_form import ViewForm
+    ViewForm(parent, product, on_add_to_order=refresh)

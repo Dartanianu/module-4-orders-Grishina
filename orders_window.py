@@ -24,8 +24,7 @@ class OrdersWindow:
 
     def is_admin(self):
         """Проверяет роль Администратора."""
-        # TODO: Верни True, если current_user[5] == "Администратор"
-        pass
+        return( self.current_user and self.current_user[5] == "Администратор")
 
     def build_ui(self):
         """Строит интерфейс."""
@@ -38,34 +37,48 @@ class OrdersWindow:
                  bg=COLOR_SECONDARY_BG).pack(pady=15)
 
         # Treeview — ДОПИСАТЬ
-        # TODO: columns = ("id", "date", "client")
-        # TODO: self.tree = ttk.Treeview(self.window, columns=columns,
-        #                                show="headings", height=15)
-        # TODO: Настрой заголовки: №, Дата, Клиент
-        # TODO: Настрой ширину: id=50, date=120, client=400
-        # TODO: self.tree.pack(fill="both", expand=True, padx=20, pady=20)
-        # TODO: self.tree.bind("<Double-1>", self.on_order_select)
+        columns = ("id", "date", "client")
+        self.tree = ttk.Treeview(self.window, columns=columns, show="headings", height=15)
+        
+        self.tree.heading("id", text="№")
+        self.tree.heading("date", text="Дата")
+        self.tree.heading("client", text="Клиент")
+        
+        self.tree.column("id", width=50, anchor="center")
+        self.tree.column("date", width=120, anchor="center")
+        self.tree.column("client", width=400, anchor="w")
+        
+        self.tree.pack(fill="both", expand=True, padx=20, pady=20)
+        self.tree.bind("<Double-1>", self.on_order_select)
 
-        # Кнопки — ДОПИСАТЬ
-        # TODO: Создай btn_frame
-        # TODO: Кнопки:
-        #       - "Просмотр состава" (command=self.on_order_select)
-        #       - "Обновить" (command=self.load_orders)
-        #       - "Назад" (command=self.window.destroy)
+        btn_frame = tk.Button(self.window, bg=COLOR_MAIN_BG)
+        btn_frame.pack(fill="x", pady=10)
+        
+        tk.Button(btn_frame, text="Просмотор состава", command=self.on_order_select)
+        
+        tk.Button(btn_frame, text="Обновить", command=self.load_orders)
+        
+        tk.Button(btn_frame, text="Назад", command=self.window.destroy)
 
     def load_orders(self):
         """Загружает заказы из БД."""
-        # TODO: Очисти таблицу: for row in self.tree.get_children(): delete
-        # TODO: orders = om.get_all_orders()
-        # TODO: Для каждого order — self.tree.insert("", tk.END, values=order)
-        pass
+        for row in self.tree.get_children():
+            self.tree.delete(row)
+        try:
+            orders = om.get_all_orders()
+            for order in orders:
+                self.tree.insert("", tk.END, values=order)
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось загрузить: {e}")
 
     def on_order_select(self, event=None):
         """Обработчик выбора заказа."""
-        # TODO: selected = self.tree.selection()
-        # TODO: Если пусто — messagebox.showwarning и return
-        # TODO: item = self.tree.item(selected[0])
-        # TODO: order_id = item["values"][0]
-        # TODO: from order_items_window import OrderItemsWindow
-        # TODO: OrderItemsWindow(self.window, order_id, self.current_user)
-        pass
+        selected = self.tree.selection()
+        if not selected:
+            messagebox.showerror("Ошибка", "Выберите заказ")
+            return
+
+        item = self.tree.item(selected[0])
+        order_id = item["values"][0]
+        from order_items_window import OrderItemsWindow
+        OrderItemsWindow(self.window, order_id, self.current_user)
